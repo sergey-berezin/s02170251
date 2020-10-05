@@ -2,7 +2,7 @@
   "profiles": {
     "Lab_1": {
       "commandName": "Project",
-      "commandLineArgs": "cock.jpg"
+      "commandLineArgs": "D:\\7_sem_prac\\Lab_1\\Lab_1\\bin\\x64\\Release\\netcoreapp2.1\\Images"
     }
   }
 }

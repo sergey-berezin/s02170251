@@ -10,15 +10,17 @@ using System.IO;
 using System.Threading;
 
 using DigitRecognition;
-
+using Lab_1;
 
 namespace OnnxSample
 {
     class Program
     {
-        static AutoResetEvent workHandler = new AutoResetEvent(true);
+        static ManualResetEvent workHandler = new ManualResetEvent(false);
 
-        public static Recognizer recognizer = new Recognizer(ref workHandler);
+        static MyOutput outp = new MyOutput();
+
+        public static Recognizer recognizer = new Recognizer(workHandler, outp);
 
         static void Main(string[] args)
         {
@@ -26,17 +28,16 @@ namespace OnnxSample
 
             Console.CancelKeyPress += new ConsoleCancelEventHandler(myHandler);
             
-            List<String> res =  recognizer.GetResults(dirName);
-
-            foreach (var s in res)
-                Console.WriteLine(s);
+            recognizer.GetResults(dirName);
         }
 
         protected static void myHandler(object sender, ConsoleCancelEventArgs args)
         {
             Console.WriteLine("ctrl + c signal recieved!");
-            recognizer.workHandler.Reset();            
+            recognizer.workHandler.Set();            
             args.Cancel = true;
         }
     }
+
+    
 }

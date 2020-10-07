@@ -14,30 +14,31 @@ namespace DigitRecognition
     public class Recognizer
     {
         AutoResetEvent outputHandler = new AutoResetEvent(true);
-        public AutoResetEvent workHandler;
+        public ManualResetEvent workHandler;
+        IResultOutput resultOutput;
 
-        List<String> result = new List<String>();
-
-        public Recognizer (ref AutoResetEvent wH )
+        public Recognizer (ManualResetEvent wH, IResultOutput outpObj)
         {
             workHandler = wH;
+            resultOutput = outpObj;
         }
 
         private void Proceed(object arg)
         {
-            var imageList = (List<Image<Rgb24>>)arg;
+            var pairList = (List< Tuple<Image<Rgb24>, string> >)arg;
 
             const int TargetWidth = 28;
             const int TargetHeight = 28;
 
-            foreach (var image in imageList)
+            foreach (var pair in pairList)
             {
-                if (workHandler.Equals(true))
+                if (workHandler.WaitOne(0))
                 {
                     Console.WriteLine("break");
                     break;
                 }
-                
+
+                var image = pair.Item1;
 
                 // Изменяем размер картинки до 224 x 224
                 image.Mutate(x =>
@@ -80,38 +81,41 @@ namespace DigitRecognition
 
                 outputHandler.WaitOne();
                 // Выдаем 10 наиболее вероятных результатов на экран
-                result.Add("Thread id = " + Thread.CurrentThread.ManagedThreadId.ToString());
+                //result.Add("Thread id = " + Thread.CurrentThread.ManagedThreadId.ToString());
+                int j = 0;
+                var result = new ResultStruct();
+                result.filename = pair.Item2;
                 foreach (var p in softmax
                     .Select((x, i) => new { Label = classLabels[i], Confidence = x })
                     .OrderByDescending(x => x.Confidence)
-                    .Take(1))
+                    .Take(10))
                 {
-                    result.Add($"{p.Label} with confidence {p.Confidence}");
+                    result.confidence[j] = p.Confidence;
+                    j++;
                 }
-                result.Add("");
+                resultOutput.SendResult(result);
                 outputHandler.Set();
 
-                Thread.Sleep(100);
+                //Thread.Sleep(100);
             }
         }
 
-        List<Thread> threads = new List<Thread>();
+        //List<Thread> threads = new List<Thread>();
 
-        public List<String> GetResults(string arg)
+        public void GetResults(string arg)
         {
             DirectoryInfo directoryInfo = new DirectoryInfo(arg);
-            List<Image<Rgb24>> myList = new List<Image<Rgb24>>();
+            var pairList = new List<Tuple<Image<Rgb24>, string>>();
             foreach (var file in directoryInfo.GetFiles()) //проходим по файлам
             {
                 //получаем расширение файла и проверяем подходит ли оно нам                 
-                myList.Add(Image.Load<Rgb24>(file.FullName));
+                pairList.Add(new Tuple<Image<Rgb24>, string>(Image.Load<Rgb24>(file.FullName), file.Name));
             }
-            
 
-            Console.WriteLine(myList.Count);
+            Console.WriteLine(pairList.Count);
 
             int numPrc = Environment.ProcessorCount;
-            int picsPerThread = myList.Count / numPrc + 1;
+            int picsPerThread = pairList.Count / numPrc + 1;
 
             Console.WriteLine("Number of threads =" + numPrc.ToString() + "  | Images per thread = " + picsPerThread.ToString());
 
@@ -119,22 +123,13 @@ namespace DigitRecognition
             {
                 Thread myThread = new Thread(new ParameterizedThreadStart(Proceed));
                 //Console.WriteLine(myThread.ManagedThreadId.ToString());
-                threads.Add(myThread);
+                //threads.Add(myThread);
                 if (i != numPrc - 1)
-                    myThread.Start(myList.GetRange(i * picsPerThread, picsPerThread));
+                    myThread.Start(pairList.GetRange(i * picsPerThread, picsPerThread));
                 else
-                    myThread.Start(myList.GetRange(i * picsPerThread, myList.Count - i * picsPerThread));
+                    myThread.Start(pairList.GetRange(i * picsPerThread, pairList.Count - i * picsPerThread));
             }
-
-            foreach (var thread in threads)
-            {
-                thread.Join();
-            }
-
-            return result;
         }
-
-       
 
         static readonly string[] classLabels = new[]
         {

@@ -14,12 +14,12 @@ namespace DigitRecognition
     public class Recognizer
     {
         AutoResetEvent outputHandler = new AutoResetEvent(true);
-        public ManualResetEvent workHandler;
+        public ManualResetEvent workHandler = new ManualResetEvent(false);
         IResultOutput resultOutput;
 
-        public Recognizer (ManualResetEvent wH, IResultOutput outpObj)
+        public Recognizer (/*ManualResetEvent wH,*/ IResultOutput outpObj)
         {
-            workHandler = wH;
+            //workHandler = wH;
             resultOutput = outpObj;
         }
 
@@ -100,7 +100,7 @@ namespace DigitRecognition
             }
         }
 
-        //List<Thread> threads = new List<Thread>();
+        List<Thread> threads = new List<Thread>();
 
         public void GetResults(string arg)
         {
@@ -123,12 +123,15 @@ namespace DigitRecognition
             {
                 Thread myThread = new Thread(new ParameterizedThreadStart(Proceed));
                 //Console.WriteLine(myThread.ManagedThreadId.ToString());
-                //threads.Add(myThread);
+                threads.Add(myThread);
                 if (i != numPrc - 1)
                     myThread.Start(pairList.GetRange(i * picsPerThread, picsPerThread));
                 else
                     myThread.Start(pairList.GetRange(i * picsPerThread, pairList.Count - i * picsPerThread));
             }
+
+            foreach (var t in threads)
+                t.Join();
         }
 
         static readonly string[] classLabels = new[]

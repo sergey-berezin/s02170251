@@ -16,11 +16,11 @@ namespace OnnxSample
 {
     class Program
     {
-        static ManualResetEvent workHandler = new ManualResetEvent(false);
+       // static ManualResetEvent workHandler = new ManualResetEvent(false);
 
         static MyOutput outp = new MyOutput();
 
-        public static Recognizer recognizer = new Recognizer(workHandler, outp);
+        public static Recognizer recognizer = new Recognizer(/*workHandler,*/ outp);
 
         static void Main(string[] args)
         {

@@ -1,0 +1,27 @@
+﻿<Window x:Class="WpfApp1.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WpfApp1"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <Grid>
+        <Button Content="Browse" HorizontalAlignment="Left" Margin="577,330,0,0" VerticalAlignment="Top" Width="100" Height="25" Click="buttonBrowseClick"/>
+        <Button Content="Stop" HorizontalAlignment="Left" Margin="682,330,0,0" VerticalAlignment="Top" Width="100" Height="25" RenderTransformOrigin="1.325,0.975" Click="buttonStopClick"/>
+        <Button Content="Run" HorizontalAlignment="Left" Margin="577,360,0,0" VerticalAlignment="Top" Width="205" Height="50" Click="buttonRunClick"/>
+        <ListView Name ="listView" ItemsSource="{Binding}" HorizontalAlignment="Left" Height="400" Margin="10,10,0,0" VerticalAlignment="Top" Width="550">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <WrapPanel>
+                        <Image Source="{Binding img}" />
+                        <TextBlock Text="{Binding filename}" />
+                    </WrapPanel>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+        <ListBox Name ="listBox" ItemsSource="{Binding DigitCount}" HorizontalAlignment="Left" Height="233" Margin="577,10,0,0" VerticalAlignment="Top" Width="205"/>
+        <Button Content="Show" Click="buttonShowClick" HorizontalAlignment="Left" Height="23" Margin="578,253,0,0" VerticalAlignment="Top" Width="204"/>
+
+    </Grid>
+</Window>

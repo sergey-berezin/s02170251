@@ -17,15 +17,14 @@ namespace DigitRecognition
         public ManualResetEvent workHandler = new ManualResetEvent(false);
         IResultOutput resultOutput;
 
-        public Recognizer (/*ManualResetEvent wH,*/ IResultOutput outpObj)
+        public Recognizer(IResultOutput outpObj)
         {
-            //workHandler = wH;
             resultOutput = outpObj;
         }
 
         private void Proceed(object arg)
         {
-            var pairList = (List< Tuple<Image<Rgb24>, string> >)arg;
+            var pairList = (List<Tuple<Image<Rgb24>, string>>)arg;
 
             const int TargetWidth = 28;
             const int TargetHeight = 28;
@@ -85,12 +84,19 @@ namespace DigitRecognition
                 int j = 0;
                 var result = new ResultStruct();
                 result.filename = pair.Item2;
+                result.img = pair.Item1;
+                float max = 0;
                 foreach (var p in softmax
                     .Select((x, i) => new { Label = classLabels[i], Confidence = x })
                     /*.OrderByDescending(x => x.Confidence)*/
                     .Take(10))
                 {
-                    result.confidence[j] = p.Confidence;
+                    //result.confidence[j] = p.Confidence;
+                    if (p.Confidence > max)
+                    {
+                        max = p.Confidence;
+                        result.res_digit = j;
+                    }
                     j++;
                 }
                 resultOutput.SendResult(result);
@@ -109,7 +115,7 @@ namespace DigitRecognition
             foreach (var file in directoryInfo.GetFiles()) //проходим по файлам
             {
                 //получаем расширение файла и проверяем подходит ли оно нам                 
-                pairList.Add(new Tuple<Image<Rgb24>, string>(Image.Load<Rgb24>(file.FullName), file.Name));
+                pairList.Add(new Tuple<Image<Rgb24>, string>(Image.Load<Rgb24>(file.FullName), file.FullName));
             }
 
             Console.WriteLine(pairList.Count);
@@ -117,7 +123,7 @@ namespace DigitRecognition
             int numPrc = Environment.ProcessorCount;
             int picsPerThread = pairList.Count / numPrc + 1;
 
-            Console.WriteLine("Number of threads =" + numPrc.ToString() + "  | Images per thread = " + picsPerThread.ToString());
+            //Console.WriteLine("Number of threads =" + numPrc.ToString() + "  | Images per thread = " + picsPerThread.ToString());
 
             for (int i = 0; i < numPrc; ++i)
             {

@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "DigitRecognition": {
+      "commandName": "Project",
+      "workingDirectory": "D:\\7_sem_prac\\Lab_2\\Lab_2\\Lab_2\\"
+    }
+  }
+}

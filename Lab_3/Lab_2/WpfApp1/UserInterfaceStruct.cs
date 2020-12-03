@@ -24,34 +24,35 @@ namespace WpfApp1
             filename = Path.GetFileName(rs.filename);
             res_digit = rs.res_digit;
 
-            img = new BitmapImage(new Uri(rs.filename, UriKind.Absolute));
+            //img = new BitmapImage(new Uri(rs.filename, UriKind.Absolute));
             //Bytes = File.ReadAllBytes(filename);
             
-            /*
+            
             PixelFormat pf = PixelFormats.Rgb24;
             int width = rs.img.Width;
             int height = rs.img.Height;
-            int rawStride = (width * pf.BitsPerPixel + 7) / 8;
+            int rawStride = width * 3;
 
             byte[] rawImage = new byte[rawStride * height];
             for (int i =0; i<height; ++i)
             {
                 Span<Rgb24>  pixelSpan = rs.img.GetPixelRowSpan(i);
-                for (int j = 0; j < width; ++j)
+                for (int j = 0; j < width; j++)
                 {
-                    rawImage[i*rawStride + j] = (byte)(pixelSpan[j].R + pixelSpan[j].G + pixelSpan[j].B); 
+                    rawImage[i * rawStride + j*3] = pixelSpan[j].R ;  
+                    rawImage[i * rawStride + j*3 + 1] = pixelSpan[j].G;
+                    rawImage[i * rawStride + j*3 + 2] = pixelSpan[j].B;
                 }                   
             }
 
             img = BitmapSource.Create(
                 width,
                 height,
-                rs.img.Metadata.HorizontalResolution,
-                rs.img.Metadata.VerticalResolution,
+                96,
+                96,
                 PixelFormats.Rgb24,
                 null,
-                rawImage, rawStride);
-          */
+                rawImage, rawStride);          
         }
 
         public UserInterfaceStruct(string s, int i)
